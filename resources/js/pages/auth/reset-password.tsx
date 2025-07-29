@@ -1,3 +1,4 @@
+import { store } from '@actions/Laravel/Fortify/Http/Controllers/NewPasswordController';
 import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
@@ -21,16 +22,16 @@ type ResetPasswordForm = {
 };
 
 export default function ResetPassword({ token, email }: ResetPasswordProps) {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<ResetPasswordForm>>({
+    const { data, setData, submit, processing, errors, reset } = useForm<Required<ResetPasswordForm>>({
         token: token,
         email: email,
         password: '',
         password_confirmation: '',
     });
 
-    const submit: FormEventHandler = (e) => {
+    const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('password.update'), {
+        submit(store(), {
             onFinish: () => reset('password', 'password_confirmation'),
         });
     };
@@ -39,7 +40,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
         <AuthLayout title="Reset password" description="Please enter your new password below">
             <Head title="Reset password" />
 
-            <form onSubmit={submit}>
+            <form onSubmit={handleSubmit}>
                 <div className="grid gap-6">
                     <div className="grid gap-2">
                         <Label htmlFor="email">Email</Label>

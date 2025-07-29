@@ -1,3 +1,5 @@
+import { create as login } from '@actions/Laravel/Fortify/Http/Controllers/AuthenticatedSessionController';
+import { store } from '@actions/Laravel/Fortify/Http/Controllers/RegisteredUserController';
 import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
@@ -17,16 +19,16 @@ type RegisterForm = {
 };
 
 export default function Register() {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
+    const { data, setData, submit, processing, errors, reset } = useForm<Required<RegisterForm>>({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
     });
 
-    const submit: FormEventHandler = (e) => {
+    const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('register'), {
+        submit(store(), {
             onFinish: () => reset('password', 'password_confirmation'),
         });
     };
@@ -34,7 +36,7 @@ export default function Register() {
     return (
         <AuthLayout title="Create an account" description="Enter your details below to create your account">
             <Head title="Register" />
-            <form className="flex flex-col gap-6" onSubmit={submit}>
+            <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
                 <div className="grid gap-6">
                     <div className="grid gap-2">
                         <Label htmlFor="name">Name</Label>
@@ -109,7 +111,7 @@ export default function Register() {
 
                 <div className="text-center text-sm text-muted-foreground">
                     Already have an account?{' '}
-                    <TextLink href={route('login')} tabIndex={6}>
+                    <TextLink href={login()} tabIndex={6}>
                         Log in
                     </TextLink>
                 </div>

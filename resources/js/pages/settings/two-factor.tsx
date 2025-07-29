@@ -1,4 +1,7 @@
 import { type BreadcrumbItem } from '@/types';
+import { store as confirmTwoFactor } from '@actions/Laravel/Fortify/Http/Controllers/ConfirmedTwoFactorAuthenticationController';
+import { store as regenerateRecoveryCodes } from '@actions/Laravel/Fortify/Http/Controllers/RecoveryCodeController';
+import { destroy as disableTwoFactor, store as enableTwoFactor } from '@actions/Laravel/Fortify/Http/Controllers/TwoFactorAuthenticationController';
 import { Head, useForm } from '@inertiajs/react';
 import { AlertTriangle, Key, LoaderCircle, Shield } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
@@ -45,14 +48,14 @@ export default function TwoFactor({
     });
     const regenerateRecoveryCodesForm = useForm({});
 
-    const enableTwoFactor = () => {
-        enableTwoFactorForm.post(route('two-factor.enable'), {
+    const handleEnableTwoFactor = () => {
+        enableTwoFactorForm.submit(enableTwoFactor(), {
             preserveScroll: true,
             onSuccess: () => setShowingQrCode(true),
         });
     };
 
-    const confirmTwoFactor: FormEventHandler = (e) => {
+    const handleConfirmTwoFactor: FormEventHandler = (e) => {
         e.preventDefault();
 
         if (!confirmTwoFactorForm.data.code) {
@@ -60,7 +63,7 @@ export default function TwoFactor({
             return;
         }
 
-        confirmTwoFactorForm.post(route('two-factor.confirm'), {
+        confirmTwoFactorForm.submit(confirmTwoFactor(), {
             errorBag: 'confirmTwoFactorAuthentication',
             preserveScroll: true,
             onSuccess: () => {
@@ -70,8 +73,8 @@ export default function TwoFactor({
         });
     };
 
-    const regenerateRecoveryCodes = () => {
-        regenerateRecoveryCodesForm.post(route('two-factor.recovery-codes'), {
+    const handleRegenerateRecoveryCodes = () => {
+        regenerateRecoveryCodesForm.submit(regenerateRecoveryCodes(), {
             preserveScroll: true,
             onSuccess: () => setShowingRecoveryCodes(true),
         });
@@ -81,9 +84,9 @@ export default function TwoFactor({
         setShowingRecoveryCodes(true);
     };
 
-    const disableTwoFactor: FormEventHandler = (e) => {
+    const handleDisableTwoFactor: FormEventHandler = (e) => {
         e.preventDefault();
-        disableTwoFactorForm.delete(route('two-factor.disable'), {
+        disableTwoFactorForm.submit(disableTwoFactor(), {
             preserveScroll: true,
             onSuccess: () => {
                 setShowingQrCode(false);
@@ -113,7 +116,7 @@ export default function TwoFactor({
                                     </p>
                                 </div>
 
-                                <Button onClick={enableTwoFactor} disabled={enableTwoFactorForm.processing} className="w-full sm:w-auto">
+                                <Button onClick={handleEnableTwoFactor} disabled={enableTwoFactorForm.processing} className="w-full sm:w-auto">
                                     {enableTwoFactorForm.processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                                     Enable Two-Factor Authentication
                                 </Button>
@@ -131,7 +134,7 @@ export default function TwoFactor({
                                 </Alert>
 
                                 <div className="flex justify-end">
-                                    <Button onClick={disableTwoFactor} variant="outline" size="sm" disabled={disableTwoFactorForm.processing}>
+                                    <Button onClick={handleDisableTwoFactor} variant="outline" size="sm" disabled={disableTwoFactorForm.processing}>
                                         {disableTwoFactorForm.processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                                         Cancel Setup
                                     </Button>
@@ -153,7 +156,7 @@ export default function TwoFactor({
                                     </Button>
 
                                     <Button
-                                        onClick={regenerateRecoveryCodes}
+                                        onClick={handleRegenerateRecoveryCodes}
                                         variant="outline"
                                         size="sm"
                                         disabled={regenerateRecoveryCodesForm.processing}
@@ -171,7 +174,7 @@ export default function TwoFactor({
                                             <DialogDescription>
                                                 This will remove the extra security layer from your account. You can re-enable it at any time.
                                             </DialogDescription>
-                                            <form className="space-y-6" onSubmit={disableTwoFactor}>
+                                            <form className="space-y-6" onSubmit={handleDisableTwoFactor}>
                                                 <DialogFooter className="gap-2">
                                                     <DialogClose asChild>
                                                         <Button variant="secondary">Cancel</Button>
@@ -215,7 +218,7 @@ export default function TwoFactor({
                                     </div>
                                 )}
 
-                                <form onSubmit={confirmTwoFactor} className="space-y-4">
+                                <form onSubmit={handleConfirmTwoFactor} className="space-y-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="code">Verification Code</Label>
                                         <Input

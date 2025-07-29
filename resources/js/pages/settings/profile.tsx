@@ -1,4 +1,6 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
+import { update } from '@actions/App/Http/Controllers/Settings/ProfileController';
+import { store } from '@actions/Laravel/Fortify/Http/Controllers/EmailVerificationNotificationController';
 import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -27,15 +29,15 @@ type ProfileForm = {
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
     const { auth } = usePage<SharedData>().props;
 
-    const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm>>({
+    const { data, setData, submit, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm>>({
         name: auth.user.name,
         email: auth.user.email,
     });
 
-    const submit: FormEventHandler = (e) => {
+    const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        patch(route('profile.update'), {
+        submit(update(), {
             preserveScroll: true,
         });
     };
@@ -48,7 +50,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 <div className="space-y-6">
                     <HeadingSmall title="Profile information" description="Update your name and email address" />
 
-                    <form onSubmit={submit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid gap-2">
                             <Label htmlFor="name">Name</Label>
 
@@ -87,8 +89,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 <p className="-mt-4 text-sm text-muted-foreground">
                                     Your email address is unverified.{' '}
                                     <Link
-                                        href={route('verification.send')}
-                                        method="post"
+                                        href={store()}
                                         as="button"
                                         className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
                                     >

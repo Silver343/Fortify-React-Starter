@@ -1,3 +1,4 @@
+import { store } from '@actions/Laravel/Fortify/Http/Controllers/TwoFactorAuthenticatedSessionController';
 import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler, useRef, useState } from 'react';
@@ -16,7 +17,7 @@ type TwoFactorChallengeForm = {
 export default function TwoFactorChallenge() {
     const [recovery, setRecovery] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
-    const { data, setData, post, processing, errors, reset, clearErrors } = useForm<TwoFactorChallengeForm>({
+    const { data, setData, submit, processing, errors, reset, clearErrors } = useForm<TwoFactorChallengeForm>({
         code: '',
         recovery_code: '',
     });
@@ -28,10 +29,10 @@ export default function TwoFactorChallenge() {
         setTimeout(() => inputRef.current?.focus(), 100);
     };
 
-    const submit: FormEventHandler = (e) => {
+    const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        post(route('two-factor.login'));
+        submit(store());
     };
 
     return (
@@ -41,7 +42,7 @@ export default function TwoFactorChallenge() {
         >
             <Head title="Two-Factor Authentication" />
 
-            <form onSubmit={submit}>
+            <form onSubmit={handleSubmit}>
                 <div className="space-y-6">
                     {!recovery ? (
                         <div className="grid gap-2">
@@ -54,8 +55,8 @@ export default function TwoFactorChallenge() {
                                 name="code"
                                 value={data.code}
                                 onChange={(e) => {
-                                    setData('code', e.target.value)
-                                    reset('recovery_code')
+                                    setData('code', e.target.value);
+                                    reset('recovery_code');
                                     clearErrors();
                                 }}
                                 autoFocus
@@ -78,7 +79,7 @@ export default function TwoFactorChallenge() {
                                 name="recovery_code"
                                 value={data.recovery_code}
                                 onChange={(e) => {
-                                    setData('recovery_code', e.target.value)
+                                    setData('recovery_code', e.target.value);
                                     reset('code');
                                     clearErrors();
                                 }}
@@ -93,11 +94,7 @@ export default function TwoFactorChallenge() {
                     )}
 
                     <div className="space-y-4">
-                        <Button
-                            type="submit"
-                            className="w-full"
-                            disabled={processing || (recovery && !data.recovery_code)}
-                        >
+                        <Button type="submit" className="w-full" disabled={processing || (recovery && !data.recovery_code)}>
                             {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                             {recovery ? 'Verify with recovery code' : 'Verify code'}
                         </Button>

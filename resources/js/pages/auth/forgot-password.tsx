@@ -1,4 +1,5 @@
 // Components
+import { create as login, store } from '@actions/Laravel/Fortify/Http/Controllers/AuthenticatedSessionController';
 import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
@@ -11,14 +12,14 @@ import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 
 export default function ForgotPassword({ status }: { status?: string }) {
-    const { data, setData, post, processing, errors } = useForm<Required<{ email: string }>>({
+    const { data, setData, submit, processing, errors } = useForm<Required<{ email: string }>>({
         email: '',
     });
 
-    const submit: FormEventHandler = (e) => {
+    const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        post(route('password.email'));
+        submit(store());
     };
 
     return (
@@ -28,7 +29,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
             {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
 
             <div className="space-y-6">
-                <form onSubmit={submit}>
+                <form onSubmit={handleSubmit}>
                     <div className="grid gap-2">
                         <Label htmlFor="email">Email address</Label>
                         <Input
@@ -55,7 +56,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
 
                 <div className="space-x-1 text-center text-sm text-muted-foreground">
                     <span>Or, return to</span>
-                    <TextLink href={route('login')}>log in</TextLink>
+                    <TextLink href={login()}>log in</TextLink>
                 </div>
             </div>
         </AuthLayout>

@@ -1,4 +1,5 @@
 // Components
+import { store } from '@actions/Laravel/Fortify/Http/Controllers/ConfirmablePasswordController';
 import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
@@ -10,14 +11,14 @@ import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 
 export default function ConfirmPassword() {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<{ password: string }>>({
+    const { data, setData, submit, processing, errors, reset } = useForm<Required<{ password: string }>>({
         password: '',
     });
 
-    const submit: FormEventHandler = (e) => {
+    const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        post(route('password.confirm'), {
+        submit(store(), {
             onFinish: () => reset('password'),
         });
     };
@@ -29,7 +30,7 @@ export default function ConfirmPassword() {
         >
             <Head title="Confirm password" />
 
-            <form onSubmit={submit}>
+            <form onSubmit={handleSubmit}>
                 <div className="space-y-6">
                     <div className="grid gap-2">
                         <Label htmlFor="password">Password</Label>

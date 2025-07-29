@@ -1,3 +1,4 @@
+import { destroy } from '@actions/App/Http/Controllers/Settings/ProfileController';
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler, useRef } from 'react';
 
@@ -12,22 +13,22 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 
 export default function DeleteUser() {
     const passwordInput = useRef<HTMLInputElement>(null);
-    const { data, setData, delete: destroy, processing, reset, errors, clearErrors } = useForm<Required<{ password: string }>>({ password: '' });
+    const deleteUserForm = useForm<Required<{ password: string }>>({ password: '' });
 
     const deleteUser: FormEventHandler = (e) => {
         e.preventDefault();
 
-        destroy(route('profile.destroy'), {
+        deleteUserForm.submit(destroy(), {
             preserveScroll: true,
             onSuccess: () => closeModal(),
             onError: () => passwordInput.current?.focus(),
-            onFinish: () => reset(),
+            onFinish: () => deleteUserForm.reset(),
         });
     };
 
     const closeModal = () => {
-        clearErrors();
-        reset();
+        deleteUserForm.clearErrors();
+        deleteUserForm.reset();
     };
 
     return (
@@ -60,13 +61,13 @@ export default function DeleteUser() {
                                     type="password"
                                     name="password"
                                     ref={passwordInput}
-                                    value={data.password}
-                                    onChange={(e) => setData('password', e.target.value)}
+                                    value={deleteUserForm.data.password}
+                                    onChange={(e) => deleteUserForm.setData('password', e.target.value)}
                                     placeholder="Password"
                                     autoComplete="current-password"
                                 />
 
-                                <InputError message={errors.password} />
+                                <InputError message={deleteUserForm.errors.password} />
                             </div>
 
                             <DialogFooter className="gap-2">
@@ -76,7 +77,7 @@ export default function DeleteUser() {
                                     </Button>
                                 </DialogClose>
 
-                                <Button variant="destructive" disabled={processing} asChild>
+                                <Button variant="destructive" disabled={deleteUserForm.processing} asChild>
                                     <button type="submit">Delete account</button>
                                 </Button>
                             </DialogFooter>
