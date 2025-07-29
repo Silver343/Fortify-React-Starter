@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Actions\Fortify;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Laravel\Fortify\Contracts\UpdatesUserPasswords;
+use Illuminate\Validation\Rules\Password;
+
+class UpdateUserPassword implements UpdatesUserPasswords
+{
+    /**
+     * Validate and update the user's password.
+     *
+     * @param  array<string, string>  $input
+     */
+    public function update(User $user, array $input): void
+    {
+        Validator::make($input, [
+            'current_password' => ['required', 'string', 'current_password:web'],
+            'password' => ['required', Password::defaults()],
+            'password_confirmation' => ['required', 'same:password'],
+        ])->validate();
+
+        $user->forceFill([
+            'password' => Hash::make($input['password']),
+        ])->save();
+    }
+}
