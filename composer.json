@@ -1,11 +1,13 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/react-starter-kit",
+    "name": "silver343/fortify-react-starter",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "The skeleton application for the Laravel framework using Fortify and React",
     "keywords": [
         "laravel",
-        "framework"
+        "framework",
+        "fortify",
+        "react"
     ],
     "license": "MIT",
     "require": {
