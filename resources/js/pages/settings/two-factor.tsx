@@ -2,9 +2,9 @@ import { type BreadcrumbItem } from '@/types';
 import { store as confirmTwoFactor } from '@actions/Laravel/Fortify/Http/Controllers/ConfirmedTwoFactorAuthenticationController';
 import { store as regenerateRecoveryCodes } from '@actions/Laravel/Fortify/Http/Controllers/RecoveryCodeController';
 import { destroy as disableTwoFactor, store as enableTwoFactor } from '@actions/Laravel/Fortify/Http/Controllers/TwoFactorAuthenticationController';
-import { Head, useForm } from '@inertiajs/react';
+import { Form, Head } from '@inertiajs/react';
 import { AlertTriangle, Key, LoaderCircle, Shield } from 'lucide-react';
-import { FormEventHandler, useState } from 'react';
+import { useState } from 'react';
 
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
@@ -41,58 +41,8 @@ export default function TwoFactor({
     const [showingQrCode, setShowingQrCode] = useState(twoFactorPending);
     const [showingRecoveryCodes, setShowingRecoveryCodes] = useState(false);
 
-    const enableTwoFactorForm = useForm({});
-    const disableTwoFactorForm = useForm({});
-    const confirmTwoFactorForm = useForm({
-        code: '',
-    });
-    const regenerateRecoveryCodesForm = useForm({});
-
-    const handleEnableTwoFactor = () => {
-        enableTwoFactorForm.submit(enableTwoFactor(), {
-            preserveScroll: true,
-            onSuccess: () => setShowingQrCode(true),
-        });
-    };
-
-    const handleConfirmTwoFactor: FormEventHandler = (e) => {
-        e.preventDefault();
-
-        if (!confirmTwoFactorForm.data.code) {
-            confirmTwoFactorForm.setError('code', 'The code field is required.');
-            return;
-        }
-
-        confirmTwoFactorForm.submit(confirmTwoFactor(), {
-            errorBag: 'confirmTwoFactorAuthentication',
-            preserveScroll: true,
-            onSuccess: () => {
-                setShowingQrCode(false);
-                setShowingRecoveryCodes(true);
-            },
-        });
-    };
-
-    const handleRegenerateRecoveryCodes = () => {
-        regenerateRecoveryCodesForm.submit(regenerateRecoveryCodes(), {
-            preserveScroll: true,
-            onSuccess: () => setShowingRecoveryCodes(true),
-        });
-    };
-
     const showRecoveryCodes = () => {
         setShowingRecoveryCodes(true);
-    };
-
-    const handleDisableTwoFactor: FormEventHandler = (e) => {
-        e.preventDefault();
-        disableTwoFactorForm.submit(disableTwoFactor(), {
-            preserveScroll: true,
-            onSuccess: () => {
-                setShowingQrCode(false);
-                setShowingRecoveryCodes(false);
-            },
-        });
     };
 
     return (
@@ -115,11 +65,14 @@ export default function TwoFactor({
                                         Two-factor authentication is not enabled. Enable it to add an extra layer of security to your account.
                                     </p>
                                 </div>
-
-                                <Button onClick={handleEnableTwoFactor} disabled={enableTwoFactorForm.processing} className="w-full sm:w-auto">
-                                    {enableTwoFactorForm.processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                    Enable Two-Factor Authentication
-                                </Button>
+                                <Form action={enableTwoFactor()} options={{ preserveScroll: true }}>
+                                    {({ processing }) => (
+                                        <Button disabled={processing} className="w-full sm:w-auto">
+                                            {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                                            Enable Two-Factor Authentication
+                                        </Button>
+                                    )}
+                                </Form>
                             </div>
                         )}
 
@@ -134,10 +87,14 @@ export default function TwoFactor({
                                 </Alert>
 
                                 <div className="flex justify-end">
-                                    <Button onClick={handleDisableTwoFactor} variant="outline" size="sm" disabled={disableTwoFactorForm.processing}>
-                                        {disableTwoFactorForm.processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                        Cancel Setup
-                                    </Button>
+                                    <Form action={disableTwoFactor()} options={{ preserveScroll: true }}>
+                                        {({ processing }) => (
+                                            <Button variant="outline" size="sm" disabled={processing}>
+                                                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                                                Cancel Setup
+                                            </Button>
+                                        )}
+                                    </Form>
                                 </div>
                             </div>
                         )}
@@ -155,15 +112,18 @@ export default function TwoFactor({
                                         Show Recovery Codes
                                     </Button>
 
-                                    <Button
-                                        onClick={handleRegenerateRecoveryCodes}
-                                        variant="outline"
-                                        size="sm"
-                                        disabled={regenerateRecoveryCodesForm.processing}
+                                    <Form
+                                        action={regenerateRecoveryCodes()}
+                                        options={{ preserveScroll: true }}
+                                        onSuccess={() => setShowingRecoveryCodes(true)}
                                     >
-                                        {regenerateRecoveryCodesForm.processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                        Regenerate Recovery Codes
-                                    </Button>
+                                        {({ processing }) => (
+                                            <Button variant="outline" size="sm" disabled={processing}>
+                                                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                                                Regenerate Recovery Codes
+                                            </Button>
+                                        )}
+                                    </Form>
 
                                     <Dialog>
                                         <DialogTrigger asChild>
@@ -174,18 +134,20 @@ export default function TwoFactor({
                                             <DialogDescription>
                                                 This will remove the extra security layer from your account. You can re-enable it at any time.
                                             </DialogDescription>
-                                            <form className="space-y-6" onSubmit={handleDisableTwoFactor}>
-                                                <DialogFooter className="gap-2">
-                                                    <DialogClose asChild>
-                                                        <Button variant="secondary">Cancel</Button>
-                                                    </DialogClose>
+                                            <Form className="space-y-6" action={disableTwoFactor()} options={{ preserveScroll: true }}>
+                                                {({ processing }) => (
+                                                    <DialogFooter className="gap-2">
+                                                        <DialogClose asChild>
+                                                            <Button variant="secondary">Cancel</Button>
+                                                        </DialogClose>
 
-                                                    <Button type="submit" variant="destructive" disabled={disableTwoFactorForm.processing}>
-                                                        {disableTwoFactorForm.processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                                        Disable Two-Factor Authentication
-                                                    </Button>
-                                                </DialogFooter>
-                                            </form>
+                                                        <Button type="submit" variant="destructive" disabled={processing}>
+                                                            {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                                                            Disable Two-Factor Authentication
+                                                        </Button>
+                                                    </DialogFooter>
+                                                )}
+                                            </Form>
                                         </DialogContent>
                                     </Dialog>
                                 </div>
@@ -218,41 +180,54 @@ export default function TwoFactor({
                                     </div>
                                 )}
 
-                                <form onSubmit={handleConfirmTwoFactor} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="code">Verification Code</Label>
-                                        <Input
-                                            id="code"
-                                            type="text"
-                                            inputMode="numeric"
-                                            value={confirmTwoFactorForm.data.code}
-                                            onChange={(e) => {
-                                                confirmTwoFactorForm.setData('code', e.target.value);
-                                                confirmTwoFactorForm.clearErrors('code');
-                                            }}
-                                            autoFocus
-                                            className="w-full"
-                                            placeholder="123456"
-                                            pattern="[0-9]{6}"
-                                            autoComplete="one-time-code"
-                                        />
+                                <Form
+                                    action={confirmTwoFactor()}
+                                    errorBag="confirmTwoFactorAuthentication"
+                                    options={{ preserveScroll: true }}
+                                    onSuccess={() => {
+                                        setShowingQrCode(false);
+                                        setShowingRecoveryCodes(true);
+                                    }}
+                                    className="space-y-4"
+                                >
+                                    {({ processing, errors, clearErrors }) => (
+                                        <>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="code">Verification Code</Label>
+                                                <Input
+                                                    id="code"
+                                                    name="code"
+                                                    type="text"
+                                                    inputMode="numeric"
+                                                    onChange={() => {
+                                                        clearErrors('code');
+                                                    }}
+                                                    defaultValue=""
+                                                    autoFocus
+                                                    className="w-full"
+                                                    placeholder="123456"
+                                                    pattern="[0-9]{6}"
+                                                    autoComplete="one-time-code"
+                                                />
 
-                                        <InputError message={confirmTwoFactorForm.errors.code} />
-                                    </div>
+                                                <InputError message={errors.code} />
+                                            </div>
 
-                                    <div className="flex space-x-4">
-                                        <Button type="submit" disabled={confirmTwoFactorForm.processing}>
-                                            {confirmTwoFactorForm.processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                            Confirm
-                                        </Button>
+                                            <div className="flex space-x-4">
+                                                <Button type="submit" disabled={processing}>
+                                                    {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                                                    Confirm
+                                                </Button>
 
-                                        {!twoFactorPending && (
-                                            <Button type="button" variant="outline" onClick={() => setShowingQrCode(false)}>
-                                                Cancel
-                                            </Button>
-                                        )}
-                                    </div>
-                                </form>
+                                                {!twoFactorPending && (
+                                                    <Button type="button" variant="outline" onClick={() => setShowingQrCode(false)}>
+                                                        Cancel
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                </Form>
                             </div>
                         )}
 
