@@ -42,7 +42,7 @@ class UserFactory extends Factory
         ]);
     }
 
-      /**
+    /**
      * Indicate that the user has set up two factor authentication but not confirmed code to activate it.
      */
     public function withTwoFactor(): static

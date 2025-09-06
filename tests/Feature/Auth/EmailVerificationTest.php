@@ -47,53 +47,50 @@ test('email is not verified with invalid hash', function () {
     expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
 });
 
-test('email is not verified with invalid user id', function ()
-    {
-        $user = User::factory()->create([
-            'email_verified_at' => null,
-        ]);
+test('email is not verified with invalid user id', function () {
+    $user = User::factory()->create([
+        'email_verified_at' => null,
+    ]);
 
-        $verificationUrl = URL::temporarySignedRoute(
-            'verification.verify',
-            now()->addMinutes(60),
-            ['id' => 123, 'hash' => sha1($user->email)]
-        );
+    $verificationUrl = URL::temporarySignedRoute(
+        'verification.verify',
+        now()->addMinutes(60),
+        ['id' => 123, 'hash' => sha1($user->email)]
+    );
 
-        $this->actingAs($user)->get($verificationUrl);
+    $this->actingAs($user)->get($verificationUrl);
 
-        $this->assertFalse($user->fresh()->hasVerifiedEmail());
-    });
+    $this->assertFalse($user->fresh()->hasVerifiedEmail());
+});
 
-    test('verified user is redirected to dashboard from verification prompt', function()
-    {
-        $this->withoutExceptionHandling();
+test('verified user is redirected to dashboard from verification prompt', function () {
+    $this->withoutExceptionHandling();
 
-        $user = User::factory()->create([
-            'email_verified_at' => now(),
-        ]);
+    $user = User::factory()->create([
+        'email_verified_at' => now(),
+    ]);
 
-        $response = $this->actingAs($user)->get('/email/verify');
+    $response = $this->actingAs($user)->get('/email/verify');
 
-        $response->assertRedirect(route('dashboard', absolute: false));
-    });
+    $response->assertRedirect(route('dashboard', absolute: false));
+});
 
-    test('already verified user visiting verification link is redirected without firing event again', function ()
-    {
-        $user = User::factory()->create([
-            'email_verified_at' => now(),
-        ]);
+test('already verified user visiting verification link is redirected without firing event again', function () {
+    $user = User::factory()->create([
+        'email_verified_at' => now(),
+    ]);
 
-        Event::fake();
+    Event::fake();
 
-        $verificationUrl = URL::temporarySignedRoute(
-            'verification.verify',
-            now()->addMinutes(60),
-            ['id' => $user->id, 'hash' => sha1($user->email)]
-        );
+    $verificationUrl = URL::temporarySignedRoute(
+        'verification.verify',
+        now()->addMinutes(60),
+        ['id' => $user->id, 'hash' => sha1($user->email)]
+    );
 
-        $this->actingAs($user)->get($verificationUrl)
-            ->assertRedirect(route('dashboard', absolute: false).'?verified=1');
+    $this->actingAs($user)->get($verificationUrl)
+        ->assertRedirect(route('dashboard', absolute: false).'?verified=1');
 
-        $this->assertTrue($user->fresh()->hasVerifiedEmail());
-        Event::assertNotDispatched(Verified::class);
-    });
+    $this->assertTrue($user->fresh()->hasVerifiedEmail());
+    Event::assertNotDispatched(Verified::class);
+});

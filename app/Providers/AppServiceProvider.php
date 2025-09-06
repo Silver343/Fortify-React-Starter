@@ -23,7 +23,6 @@ class AppServiceProvider extends ServiceProvider
         Password::defaults(function () {
 
             /** @var \Illuminate\Foundation\Application $app */
-
             $app = $this->app;
 
             return $app->isProduction()

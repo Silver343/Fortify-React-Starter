@@ -55,7 +55,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function isTwoFactorEnabled(): bool
     {
-        return !is_null($this->two_factor_secret) && !is_null($this->two_factor_confirmed_at);
+        return ! is_null($this->two_factor_secret) && ! is_null($this->two_factor_confirmed_at);
     }
 
     /**
@@ -63,7 +63,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function isTwoFactorPending(): bool
     {
-        return !is_null($this->two_factor_secret) && is_null($this->two_factor_confirmed_at);
+        return ! is_null($this->two_factor_secret) && is_null($this->two_factor_confirmed_at);
     }
 
     /**

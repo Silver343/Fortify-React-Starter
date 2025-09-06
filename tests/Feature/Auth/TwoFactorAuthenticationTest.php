@@ -1,17 +1,17 @@
 <?php
 
 use App\Models\User;
-use Laravel\Fortify\Events\TwoFactorAuthenticationFailed;
-use Laravel\Fortify\Events\TwoFactorAuthenticationEnabled;
-use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
-use Laravel\Fortify\Events\TwoFactorAuthenticationChallenged;
-use Laravel\Fortify\Events\ValidTwoFactorAuthenticationCodeProvided;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Fortify\Events\RecoveryCodeReplaced;
 use Laravel\Fortify\Events\RecoveryCodesGenerated;
+use Laravel\Fortify\Events\TwoFactorAuthenticationChallenged;
 use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
+use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
+use Laravel\Fortify\Events\TwoFactorAuthenticationEnabled;
+use Laravel\Fortify\Events\TwoFactorAuthenticationFailed;
+use Laravel\Fortify\Events\ValidTwoFactorAuthenticationCodeProvided;
 use PragmaRX\Google2FA\Google2FA;
 
 use function Pest\Laravel\actingAs;
@@ -61,12 +61,11 @@ test('two factor authentication requires confirmation before use', function () {
     expect($user->isTwoFactorEnabled())->toBeFalse();
     expect($user->isTwoFactorPending())->toBeTrue();
 
-
     // Mock the confirmation process
     actingAs($user)
         ->withSession(['auth.password_confirmed_at' => time()])
         ->post(route('two-factor.confirm'), [
-            'code' => $validOTP
+            'code' => $validOTP,
         ]);
 
     // After confirmation, 2FA should be enabled
@@ -137,7 +136,6 @@ test('recovery codes can be regenerated', function () {
 
     Event::assertDispatched(RecoveryCodesGenerated::class);
 });
-
 
 test('user is redirected to challenge when using two factor authentication', function () {
     Event::fake();

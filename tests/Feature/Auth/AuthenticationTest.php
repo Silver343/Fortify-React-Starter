@@ -18,7 +18,6 @@ test('users can authenticate using the login screen', function () {
         'password' => 'password',
     ]);
 
-
     $this->assertAuthenticated();
     $response->assertRedirect(route('dashboard', absolute: false));
 });
@@ -38,7 +37,6 @@ test('users can not authenticate with invalid password', function () {
     $response->assertRedirect(route('login', absolute: false));
 });
 
-
 test('users can logout', function () {
     $user = User::factory()->create();
 
@@ -48,27 +46,26 @@ test('users can logout', function () {
     $response->assertRedirect('/');
 });
 
-test('users are rate limited', function ()
-    {
-        $user = User::factory()->create();
+test('users are rate limited', function () {
+    $user = User::factory()->create();
 
-        for ($i = 0; $i < 5; $i++) {
-            $this->post('/login', [
-                'email' => $user->email,
-                'password' => 'wrong-password',
-            ])->assertStatus(302)->assertSessionHasErrors([
-                'email' => 'These credentials do not match our records.',
-            ]);
-        }
-
-        $response = $this->post('/login', [
+    for ($i = 0; $i < 5; $i++) {
+        $this->post('/login', [
             'email' => $user->email,
             'password' => 'wrong-password',
+        ])->assertStatus(302)->assertSessionHasErrors([
+            'email' => 'These credentials do not match our records.',
         ]);
+    }
 
-        $response->assertSessionHasErrors('email');
+    $response = $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'wrong-password',
+    ]);
 
-        $errors = session('errors');
+    $response->assertSessionHasErrors('email');
 
-        $this->assertStringContainsString('Too many login attempts', $errors->first('email'));
-    });
+    $errors = session('errors');
+
+    $this->assertStringContainsString('Too many login attempts', $errors->first('email'));
+});
